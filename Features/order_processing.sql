@@ -14,9 +14,10 @@ JOIN PRODUCT p ON oi.product_id = p.product_id
 WHERE oi.order_id = 1;
 
 -- Deduct stock when an order item is placed
-UPDATE PRODUCT
+UPDATE PRODUCT, ORDER_ITEM
 SET stock_quantity = stock_quantity - ORDER_ITEM.quantity
-WHERE PRODUCT.product_id = ORDER_ITEM.product_id;
+WHERE ORDER_ITEM.product_id = PRODUCT.product_id
+AND ORDER_ITEM.order_item_id = (SELECT order_item_id FROM ORDER_ITEM ORDER BY order_item_id DESC LIMIT 1);
 
 -- Update order status
 UPDATE ORDERS
