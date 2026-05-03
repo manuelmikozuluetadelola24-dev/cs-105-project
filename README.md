@@ -3,7 +3,7 @@
 
 ### Database
 + Delivery Tracking (/)
-+ General Utility Queries (X)
++ General Utility Queries (/)
 + Inventory Management (X)
 + Order Processing (X)
 + Reporting (X)
