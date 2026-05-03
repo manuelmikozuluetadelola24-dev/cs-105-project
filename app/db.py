@@ -11,7 +11,10 @@ import pymysql.cursors
 # NOTE: filter functions usually expect a string containing an SQL string enclosed
 #	in single quotes: "'filter_string'"
 
-
+def outputQuery(sql, result):
+	print("Query: " + sql + "\n")
+	for row in result:
+		print(row)
 
 # MySQL Server Connection
 
@@ -35,21 +38,17 @@ def listDeliveries(connection, order="DESC", order_by="`DELIVERY`.`delivery_id`"
 	with connection:
 		with connection.cursor() as cursor:
 			sql = "SELECT `DELIVERY`.`delivery_id`, `customer_name`, `ORDERS`.`order_id`, `delivery_date`, `DELIVERY`.`status`, `delivered_by`, CONCAT(`delivery_street`, ' ', `delivery_barangay`, ' ', `delivery_city`) AS `delivery_address` FROM `DELIVERY` JOIN `ORDERS` ON `DELIVERY`.`order_id` = `ORDERS`.`order_id` JOIN `CUSTOMER` ON `CUSTOMER`.`customer_id` = `CUSTOMER`.`customer_id` ORDER BY " + order_by + " " + order
-			print("Query: " + sql + "\n")
 			cursor.execute(sql)
 			result = cursor.fetchall()
-			for row in result:
-				print(row)
+			outputQuery(sql, result)
 
 def filterDeliveriesBy(connection, status="'DELIVERED'"):
 	with connection:
 		with connection.cursor() as cursor:
 			sql = "SELECT `DELIVERY`.`delivery_id`, `customer_name`, `delivery_date`, `DELIVERY`.`status`, `delivered_by` FROM `DELIVERY` JOIN `ORDERS` ON `DELIVERY`.`order_id` = `ORDERS`.`order_id` JOIN `CUSTOMER` ON `ORDERS`.`customer_id` = `CUSTOMER`.`customer_id` WHERE `DELIVERY`.`status` = " + status
-			print("Query: " + sql + "\n")
 			cursor.execute(sql)
 			result = cursor.fetchall()
-			for row in result:
-				print(row)
+			outputQuery(sql, result)
 
 # General Utility
 
@@ -57,21 +56,17 @@ def filterProductByCategory(connection, category):
 	with connection:
 		with connection.cursor() as cursor:
 			sql = "SELECT `PRODUCT`.`product_id`, `product_name`, `price`, `stock_quantity` FROM `PRODUCT` JOIN `PRODUCT_CATEGORY` ON `PRODUCT`.`category_id` = `PRODUCT_CATEGORY`.`category_id` WHERE `PRODUCT_CATEGORY`.`category_name` = " + category
-			print("Query: " + sql + "\n")
 			cursor.execute(sql)
 			result = cursor.fetchall()
-			for row in result:
-				print(row)
+			outputQuery(sql, result)
 
 def listCustomers(connection, order="DESC", order_by="`customer_name`"):
 	with connection:
 		with connection.cursor() as cursor:
 			sql = "SELECT `customer_id`, `customer_name`, `customer_city`, `contact_number` FROM `CUSTOMER` ORDER BY " + order_by + " " + order
-			print("Query: " + sql + "\n")
 			cursor.execute(sql)
 			result = cursor.fetchall()
-			for row in result:
-				print(row)
+			outputQuery(sql, result)
 
 # Inventory Management
 
@@ -79,8 +74,6 @@ def listStockLevel(connection):
 	with connection:
 		with connection.cursor() as cursor:
 			sql = "SELECT `PRODUCT`.`product_id`, `product_name`, `category_name`, `stock_quantity`, `price` FROM `PRODUCT` JOIN `PRODUCT_CATEGORY` ON `PRODUCT`.`category_id` = `PRODUCT_CATEGORY`.`category_id` ORDER BY `stock_quantity` ASC"
-			print("Query: " + sql + "\n")
 			cursor.execute(sql)
 			result = cursor.fetchall()
-			for row in result:
-				print(row)
+			outputQuery(sql, result)
