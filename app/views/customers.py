@@ -44,6 +44,8 @@ class CustomersView(ctk.CTkFrame):
         form = ctk.CTkToplevel(self)
         form.title("Add Customer")
         form.geometry("400x450")
+        form.lift()                    
+        form.attributes("-topmost", True)
 
         fields = ["Name", "Contact Number", "Street", "Barangay", "City", "Province"]
         entries = {}
