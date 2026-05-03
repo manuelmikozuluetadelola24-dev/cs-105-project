@@ -34,4 +34,14 @@ class DashboardView(ctk.CTk):
         self.content_label.pack(expand=True)
 
     def show(self, section):
-        self.content_label.configure(text=f"{section} — coming soon")
+        for widget in self.main_frame.winfo_children():
+            widget.destroy()
+
+        if section == "Customers":
+            try:
+                from views.customers import CustomersView
+                CustomersView(self.main_frame).pack(fill="both", expand=True)
+            except Exception as e:
+                ctk.CTkLabel(self.main_frame, text=f"Error: {e}", font=ctk.CTkFont(size=14), text_color="red").pack(expand=True)
+        else:
+            ctk.CTkLabel(self.main_frame, text=f"{section} — coming soon", font=ctk.CTkFont(size=18)).pack(expand=True)
