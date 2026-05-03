@@ -3,6 +3,7 @@ import customtkinter as ctk
 class LoginView(ctk.CTk):
     def __init__(self):
         super().__init__()
+        self.logged_in_role = None
         self.title("Delola Store")
         self.geometry("400x300")
         self.resizable(False, False)
@@ -32,10 +33,10 @@ class LoginView(ctk.CTk):
         password = self.password_entry.get()
 
         if role == "Owner" and password == "owner123":
-            self.destroy()  # closes the login window
-            print("Logged in as Owner")
+            self.logged_in_role = "Owner"
+            self.destroy()
         elif role == "Employee" and password == "emp123":
-            self.destroy()  # closes the login window
-            print("Logged in as Employee")
+            self.logged_in_role = "Employee"
+            self.destroy()
         else:
             self.error_label.configure(text="Incorrect password.")
