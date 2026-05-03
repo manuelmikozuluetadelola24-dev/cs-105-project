@@ -12,5 +12,8 @@ def testQueries():
 	connection = db.initializeConnection(*(db.getConfig()))
 	print("\n\n")
 	db.listCustomers(connection, "ASC", "`customer_id`")
+	connection = db.initializeConnection(*(db.getConfig()))
+	print("\n\n")
+	db.listStockLevel(connection)
 
 testQueries()

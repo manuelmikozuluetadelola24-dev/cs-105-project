@@ -72,3 +72,15 @@ def listCustomers(connection, order="DESC", order_by="`customer_name`"):
 			result = cursor.fetchall()
 			for row in result:
 				print(row)
+
+# Inventory Management
+
+def listStockLevel(connection):
+	with connection:
+		with connection.cursor() as cursor:
+			sql = "SELECT `PRODUCT`.`product_id`, `product_name`, `category_name`, `stock_quantity`, `price` FROM `PRODUCT` JOIN `PRODUCT_CATEGORY` ON `PRODUCT`.`category_id` = `PRODUCT_CATEGORY`.`category_id` ORDER BY `stock_quantity` ASC"
+			print("Query: " + sql + "\n")
+			cursor.execute(sql)
+			result = cursor.fetchall()
+			for row in result:
+				print(row)
