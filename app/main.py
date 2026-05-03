@@ -1,4 +1,7 @@
 import db
 
 connection = db.initializeConnection(*(db.getConfig()))
-db.listDeliveries(connection)
+db.filterDeliveriesStatusDelivered(connection)
+print("\n\n")
+connection = db.initializeConnection(*(db.getConfig()))
+db.filterDeliveriesStatusShipped(connection)

@@ -22,3 +22,30 @@ def listDeliveries(connection):
 			result = cursor.fetchall()
 			for row in result:
 				print(row)
+
+def filterDeliveriesStatusPending(connection):
+	with connection:
+		with connection.cursor() as cursor:
+			sql = "SELECT `DELIVERY`.`delivery_id`, `customer_name`, `delivery_date`, `DELIVERY`.`status`, `delivered_by` FROM `DELIVERY` JOIN `ORDERS` ON `DELIVERY`.`order_id` = `ORDERS`.`order_id` JOIN `CUSTOMER` ON `ORDERS`.`customer_id` = `CUSTOMER`.`customer_id` WHERE `DELIVERY`.`status` = 'PENDING'"
+			cursor.execute(sql)
+			result = cursor.fetchall()
+			for row in result:
+				print(row)
+
+def filterDeliveriesStatusDelivered(connection):
+	with connection:
+		with connection.cursor() as cursor:
+			sql = "SELECT `DELIVERY`.`delivery_id`, `customer_name`, `delivery_date`, `DELIVERY`.`status`, `delivered_by` FROM `DELIVERY` JOIN `ORDERS` ON `DELIVERY`.`order_id` = `ORDERS`.`order_id` JOIN `CUSTOMER` ON `ORDERS`.`customer_id` = `CUSTOMER`.`customer_id` WHERE `DELIVERY`.`status` = 'DELIVERED'"
+			cursor.execute(sql)
+			result = cursor.fetchall()
+			for row in result:
+				print(row)
+
+def filterDeliveriesStatusShipped(connection):
+	with connection:
+		with connection.cursor() as cursor:
+			sql = "SELECT `DELIVERY`.`delivery_id`, `customer_name`, `delivery_date`, `DELIVERY`.`status`, `delivered_by` FROM `DELIVERY` JOIN `ORDERS` ON `DELIVERY`.`order_id` = `ORDERS`.`order_id` JOIN `CUSTOMER` ON `ORDERS`.`customer_id` = `CUSTOMER`.`customer_id` WHERE `DELIVERY`.`status` = 'SHIPPED'"
+			cursor.execute(sql)
+			result = cursor.fetchall()
+			for row in result:
+				print(row)
