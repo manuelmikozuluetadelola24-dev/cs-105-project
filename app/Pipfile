@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 customtkinter = "==5.2.2"
 pymysql = "==1.1.3"
+cryptography = "*"
 
 [dev-packages]
 
