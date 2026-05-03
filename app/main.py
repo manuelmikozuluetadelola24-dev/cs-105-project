@@ -1,7 +1,7 @@
 import db
 
 connection = db.initializeConnection(*(db.getConfig()))
-db.filterDeliveriesStatusDelivered(connection)
+db.filterDeliveriesBy(connection, "DELIVERED")
 print("\n\n")
 connection = db.initializeConnection(*(db.getConfig()))
-db.filterDeliveriesStatusShipped(connection)
+db.filterDeliveriesBy(connection, "SHIPPED")
