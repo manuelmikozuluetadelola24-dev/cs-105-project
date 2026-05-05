@@ -5,7 +5,7 @@
 + Delivery Tracking (/)
 + General Utility Queries (/)
 + Inventory Management (/)
-+ Order Processing (X)
++ Order Processing (/)
 + Reporting (X)
 + Supplier and Shipment (X)
 

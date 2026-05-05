@@ -70,10 +70,10 @@ def listCustomers(connection, order="DESC", order_by="`customer_name`"):
 
 # Inventory Management
 
-def listStockLevel(connection):
+def listStockLevel(connection, order="ASC", order_by="`stock_quantity`"):
 	with connection:
 		with connection.cursor() as cursor:
-			sql = "SELECT `PRODUCT`.`product_id`, `product_name`, `category_name`, `stock_quantity`, `price` FROM `PRODUCT` JOIN `PRODUCT_CATEGORY` ON `PRODUCT`.`category_id` = `PRODUCT_CATEGORY`.`category_id` ORDER BY `stock_quantity` ASC"
+			sql = "SELECT `PRODUCT`.`product_id`, `product_name`, `category_name`, `stock_quantity`, `price` FROM `PRODUCT` JOIN `PRODUCT_CATEGORY` ON `PRODUCT`.`category_id` = `PRODUCT_CATEGORY`.`category_id` ORDER BY " + order_by + " " + order
 			cursor.execute(sql)
 			result = cursor.fetchall()
 			outputQuery(sql, result)
@@ -84,9 +84,43 @@ def addShipmentItemToProductStockLevel(connection):
 			sql = "UPDATE `PRODUCT` JOIN `SHIPMENT_ITEM` ON `PRODUCT`.`product_id` = `SHIPMENT_ITEM`.`product_id` JOIN `SHIPMENT` ON `SHIPMENT_ITEM`.`shipment_id` = `SHIPMENT`.`shipment_id` SET `PRODUCT`.`stock_quantity` = `PRODUCT`.`stock_quantity` + `SHIPMENT_ITEM`.`quantity` WHERE `SHIPMENT`.`status` = 'DELIVERED'"
 			cursor.execute(sql)
 
-def listLowStockLevel(connection):
+def listLowStockLevel(connection, low_threshold="10"):
 	with connection:
 		with connection.cursor() as cursor:
-			sql = "SELECT `PRODUCT`.`product_id`, `product_name`, `PRODUCT_CATEGORY`.`category_name`, `stock_quantity` FROM `PRODUCT` JOIN `PRODUCT_CATEGORY` ON `PRODUCT`.`category_id` = `PRODUCT_CATEGORY`.`category_id` WHERE `PRODUCT`.`stock_quantity` <= 10 ORDER BY `PRODUCT`.`stock_quantity` ASC"
+			sql = "SELECT `PRODUCT`.`product_id`, `product_name`, `PRODUCT_CATEGORY`.`category_name`, `stock_quantity` FROM `PRODUCT` JOIN `PRODUCT_CATEGORY` ON `PRODUCT`.`category_id` = `PRODUCT_CATEGORY`.`category_id` WHERE `PRODUCT`.`stock_quantity` <= " + low_threshold + " ORDER BY `PRODUCT`.`stock_quantity` ASC"
+			cursor.execute(sql)
 			result = cursor.fetchall()
 			outputQuery(sql, result)
+
+# Order Handling
+
+def listOrderWithCustomerInfo(connection, order="DESC", order_by="`order_date`"):
+	with connection:
+		with connection.cursor() as cursor:
+			sql = "SELECT `ORDERS`.`order_id`, `customer_name`, `order_date`, `order_type`, `ORDERS`.`status`, `total_price` FROM `ORDERS` JOIN `CUSTOMER` ON `ORDERS`.`customer_id` = `CUSTOMER`.`customer_id` ORDER BY " + order_by + " " + order
+			cursor.execute(sql)
+			result = cursor.fetchall()
+			outputQuery(sql, result)
+
+def listOrderItemsInOrder(connection, order="DESC", order_by="`order_id`", with_id):
+	with connection:
+		with connection.cursor() as cursor:
+			sql = "SELECT `ORDER_ITEM`.`order_item_id`, `product_name`, `ORDER_ITEM`.`quantity`, `selling_price`, (`ORDER_ITEM`.`quantity` * `selling_price`) AS `item_total` FROM `ORDER_ITEM` JOIN `PRODUCT` ON `ORDER_ITEM`.`product_id` = `PRODUCT`.`product_id` WHERE `ORDER_ITEM`.`order_id`= " + with_id + "  ORDER BY " + order_by + " " + order
+			cursor.execute(sql)
+			result = cursor.fetchall()
+			outputQuery(sql, result)
+
+def deductFromStock(connection, deduct_amount, with_id):
+	with connection:
+		with connection.cursor() as cursor:
+			sql = "UPDATE `PRODUCT` SET `stock_quantity` = `stock_quantity` " + deduct_amount + " WHERE `PRODUCT`.`product_id` = " + with_id
+			cursor.execute(sql)
+
+# new_status values: "'PENDING'", "'SHIPPED'", "'DELIVERED'", "'CANCELLED'"
+def updateOrderStatus(connection, new_status, with_id):
+	with connection:
+		with connection.cursor() as cursor:
+			sql = "UPDATE `ORDERS` SET `ORDERS`.`status` = " + new_status + " WHERE `ORDERS`.`order_id` = " + with_id
+			cursor.execute(sql)
+
+# Reporting
