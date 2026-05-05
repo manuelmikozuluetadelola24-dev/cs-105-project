@@ -77,3 +77,16 @@ def listStockLevel(connection):
 			cursor.execute(sql)
 			result = cursor.fetchall()
 			outputQuery(sql, result)
+
+def addShipmentItemToProductStockLevel(connection):
+	with connection:
+		with connection.cursor() as cursor:
+			sql = "UPDATE `PRODUCT` JOIN `SHIPMENT_ITEM` ON `PRODUCT`.`product_id` = `SHIPMENT_ITEM`.`product_id` JOIN `SHIPMENT` ON `SHIPMENT_ITEM`.`shipment_id` = `SHIPMENT`.`shipment_id` SET `PRODUCT`.`stock_quantity` = `PRODUCT`.`stock_quantity` + `SHIPMENT_ITEM`.`quantity` WHERE `SHIPMENT`.`status` = 'DELIVERED'"
+			cursor.execute(sql)
+
+def listLowStockLevel(connection):
+	with connection:
+		with connection.cursor() as cursor:
+			sql = "SELECT `PRODUCT`.`product_id`, `product_name`, `PRODUCT_CATEGORY`.`category_name`, `stock_quantity` FROM `PRODUCT` JOIN `PRODUCT_CATEGORY` ON `PRODUCT`.`category_id` = `PRODUCT_CATEGORY`.`category_id` WHERE `PRODUCT`.`stock_quantity` <= 10 ORDER BY `PRODUCT`.`stock_quantity` ASC"
+			result = cursor.fetchall()
+			outputQuery(sql, result)
