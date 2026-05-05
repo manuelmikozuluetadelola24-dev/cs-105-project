@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from db.connection import get_connection
+import db.db
 
 class CustomersView(ctk.CTkFrame):
     def __init__(self, parent):
