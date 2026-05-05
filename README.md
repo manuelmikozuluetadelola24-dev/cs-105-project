@@ -10,3 +10,5 @@
 + Supplier and Shipment (X)
 
 ### User Interface
+
+**TODO: Replace python connector function calls with functions from db.py
