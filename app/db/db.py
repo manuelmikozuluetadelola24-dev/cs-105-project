@@ -11,7 +11,7 @@ import pymysql.cursors
 # NOTE: filter functions usually expect a string containing an SQL string enclosed
 #	in single quotes: "'filter_string'"
 
-def outputQuery(sql, result):
+def outputQueryToConsole(sql, result):
 	print("Query: " + sql + "\n")
 	for row in result:
 		print(row)
@@ -40,7 +40,8 @@ def listDeliveries(connection, order="DESC", order_by="`DELIVERY`.`delivery_id`"
 			sql = "SELECT `DELIVERY`.`delivery_id`, `customer_name`, `ORDERS`.`order_id`, `delivery_date`, `DELIVERY`.`status`, `delivered_by`, CONCAT(`delivery_street`, ' ', `delivery_barangay`, ' ', `delivery_city`) AS `delivery_address` FROM `DELIVERY` JOIN `ORDERS` ON `DELIVERY`.`order_id` = `ORDERS`.`order_id` JOIN `CUSTOMER` ON `CUSTOMER`.`customer_id` = `CUSTOMER`.`customer_id` ORDER BY " + order_by + " " + order
 			cursor.execute(sql)
 			result = cursor.fetchall()
-			outputQuery(sql, result)
+			outputQueryToConsole(sql, result)
+			return result
 
 def filterDeliveriesBy(connection, status="'DELIVERED'"):
 	with connection:
@@ -48,7 +49,8 @@ def filterDeliveriesBy(connection, status="'DELIVERED'"):
 			sql = "SELECT `DELIVERY`.`delivery_id`, `customer_name`, `delivery_date`, `DELIVERY`.`status`, `delivered_by` FROM `DELIVERY` JOIN `ORDERS` ON `DELIVERY`.`order_id` = `ORDERS`.`order_id` JOIN `CUSTOMER` ON `ORDERS`.`customer_id` = `CUSTOMER`.`customer_id` WHERE `DELIVERY`.`status` = " + status
 			cursor.execute(sql)
 			result = cursor.fetchall()
-			outputQuery(sql, result)
+			outputQueryToConsole(sql, result)
+			return result
 
 # General Utility
 
@@ -58,7 +60,8 @@ def filterProductByCategory(connection, category):
 			sql = "SELECT `PRODUCT`.`product_id`, `product_name`, `price`, `stock_quantity` FROM `PRODUCT` JOIN `PRODUCT_CATEGORY` ON `PRODUCT`.`category_id` = `PRODUCT_CATEGORY`.`category_id` WHERE `PRODUCT_CATEGORY`.`category_name` = " + category
 			cursor.execute(sql)
 			result = cursor.fetchall()
-			outputQuery(sql, result)
+			outputQueryToConsole(sql, result)
+			return result
 
 def listCustomers(connection, order="DESC", order_by="`customer_name`"):
 	with connection:
@@ -66,7 +69,8 @@ def listCustomers(connection, order="DESC", order_by="`customer_name`"):
 			sql = "SELECT `customer_id`, `customer_name`, `customer_city`, `contact_number` FROM `CUSTOMER` ORDER BY " + order_by + " " + order
 			cursor.execute(sql)
 			result = cursor.fetchall()
-			outputQuery(sql, result)
+			outputQueryToConsole(sql, result)
+			return result
 
 # Inventory Management
 
@@ -76,7 +80,8 @@ def listStockLevel(connection, order="ASC", order_by="`stock_quantity`"):
 			sql = "SELECT `PRODUCT`.`product_id`, `product_name`, `category_name`, `stock_quantity`, `price` FROM `PRODUCT` JOIN `PRODUCT_CATEGORY` ON `PRODUCT`.`category_id` = `PRODUCT_CATEGORY`.`category_id` ORDER BY " + order_by + " " + order
 			cursor.execute(sql)
 			result = cursor.fetchall()
-			outputQuery(sql, result)
+			outputQueryToConsole(sql, result)
+			return result
 
 def addShipmentItemToProductStockLevel(connection):
 	with connection:
@@ -90,7 +95,8 @@ def listLowStockLevel(connection, low_threshold="10"):
 			sql = "SELECT `PRODUCT`.`product_id`, `product_name`, `PRODUCT_CATEGORY`.`category_name`, `stock_quantity` FROM `PRODUCT` JOIN `PRODUCT_CATEGORY` ON `PRODUCT`.`category_id` = `PRODUCT_CATEGORY`.`category_id` WHERE `PRODUCT`.`stock_quantity` <= " + low_threshold + " ORDER BY `PRODUCT`.`stock_quantity` ASC"
 			cursor.execute(sql)
 			result = cursor.fetchall()
-			outputQuery(sql, result)
+			outputQueryToConsole(sql, result)
+			return result
 
 # Order Handling
 
@@ -100,15 +106,17 @@ def listOrderWithCustomerInfo(connection, order="DESC", order_by="`order_date`")
 			sql = "SELECT `ORDERS`.`order_id`, `customer_name`, `order_date`, `order_type`, `ORDERS`.`status`, `total_price` FROM `ORDERS` JOIN `CUSTOMER` ON `ORDERS`.`customer_id` = `CUSTOMER`.`customer_id` ORDER BY " + order_by + " " + order
 			cursor.execute(sql)
 			result = cursor.fetchall()
-			outputQuery(sql, result)
+			outputQueryToConsole(sql, result)
+			return result
 
-def listOrderItemsInOrder(connection, order="DESC", order_by="`order_id`", with_id):
+def listOrderItemsInOrder(connection, with_id, order="DESC", order_by="`order_id`"):
 	with connection:
 		with connection.cursor() as cursor:
 			sql = "SELECT `ORDER_ITEM`.`order_item_id`, `product_name`, `ORDER_ITEM`.`quantity`, `selling_price`, (`ORDER_ITEM`.`quantity` * `selling_price`) AS `item_total` FROM `ORDER_ITEM` JOIN `PRODUCT` ON `ORDER_ITEM`.`product_id` = `PRODUCT`.`product_id` WHERE `ORDER_ITEM`.`order_id`= " + with_id + "  ORDER BY " + order_by + " " + order
 			cursor.execute(sql)
 			result = cursor.fetchall()
-			outputQuery(sql, result)
+			outputQueryToConsole(sql, result)
+			return result
 
 def deductFromStock(connection, deduct_amount, with_id):
 	with connection:

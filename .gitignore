@@ -1,4 +1,5 @@
-__pycache__
+app/__pycache__
 app/Pipfile.lock
-config
-.vscode/
+app/config
+.vscode
+app/.venv

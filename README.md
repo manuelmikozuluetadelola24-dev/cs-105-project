@@ -1,4 +1,14 @@
 
+## BUILD INSTRUCTIONS
+> I removed the .venv folder because it doesn't work on my machine, best not to
+> share it in the repository and create your own virtual environment with
+> pipenv.  
+
+Run `pipenv --venv` to check if a virtual environment already exists
+Run `pipenv install` if not
+Run `pipenv lock` then `pipenv sync` to make sure dependencies are properly
+installed
+
 # FEATURE IMPLEMENTATION STATUS
 
 ### Database

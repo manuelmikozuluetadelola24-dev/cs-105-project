@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from views.login import LoginView
 from views.dashboard import DashboardView
 import db.db
