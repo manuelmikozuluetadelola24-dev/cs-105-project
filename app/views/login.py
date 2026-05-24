@@ -5,6 +5,7 @@ class LoginView(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.logged_in = False
+        self.user_role = None
         self.title("Delola Store")
         self.geometry("400x300")
         self.resizable(False, False)
@@ -36,6 +37,11 @@ class LoginView(ctk.CTk):
             db.config[2] = user
             db.config[3] = password
             self.logged_in = True
+            if(user == "root"):
+                self.user_role = "Owner"
+            else:
+                self.user_role = "Employee"
+
             self.destroy()
         else:
             self.logged_in = False

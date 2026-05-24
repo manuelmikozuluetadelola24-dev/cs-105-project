@@ -24,7 +24,7 @@ def main():
     login.mainloop()
 
     if(login.logged_in):
-        dashboard = DashboardView("Employee")
+        dashboard = DashboardView(login.user_role)
         dashboard.mainloop()
 
 main()
