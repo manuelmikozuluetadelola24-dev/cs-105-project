@@ -1,5 +1,5 @@
 import pymysql.cursors
-
+import os
 # NOTE: Every function that executes a mysql query will close the connection passed
 #    to them once they finish executing.
 
@@ -20,15 +20,16 @@ def outputQueryToConsole(sql, result):
 config = []
 
 def getConfig():
-    global config
-    config_file = open("config", "r")
+    config = []
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    config_file = open(os.path.join(base_dir, "config"), "r")
     for line in config_file:
         config.append(line.strip())
-    
     config_file.close()
+    return config
 
 def initializeConnection():
-    global config
+    config = getConfig()
     db_host, db_user, db_pass, db_name = config
     connection = pymysql.connect(host=db_host, user=db_user, password=db_pass, database=db_name, cursorclass=pymysql.cursors.Cursor)
     return connection
