@@ -18,5 +18,4 @@ class LoginFrame(customtkinter.CTkFrame):
         login_credentials = []
         login_credentials.append(self.login_user_entry.get())
         login_credentials.append(self.login_password_entry.get())
-        print(login_credentials)
         return login_credentials
