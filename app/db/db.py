@@ -54,7 +54,7 @@ def checkUser(db_user, db_pass):
 def listDeliveries(connection, order="DESC", order_by="`DELIVERY`.`delivery_id`"):
     with connection:
         with connection.cursor() as cursor:
-            sql = "SELECT `DELIVERY`.`delivery_id`, `customer_name`, `ORDERS`.`order_id`, `delivery_date`, `DELIVERY`.`status`, `delivered_by`, CONCAT(`delivery_street`, ' ', `delivery_barangay`, ' ', `delivery_city`) AS `delivery_address` FROM `DELIVERY` JOIN `ORDERS` ON `DELIVERY`.`order_id` = `ORDERS`.`order_id` JOIN `CUSTOMER` ON `CUSTOMER`.`customer_id` = `CUSTOMER`.`customer_id` ORDER BY " + order_by + " " + order
+            sql = "SELECT `DELIVERY`.`delivery_id`, `ORDERS`.`order_id`, `delivery_date`, `delivery_street`, `delivery_barangay`, `delivery_city`, `delivery_province`, `delivered_by`,  `DELIVERY`.`status` FROM `DELIVERY` JOIN `ORDERS` ON `DELIVERY`.`order_id` = `ORDERS`.`order_id` ORDER BY " + order_by + " " + order
             cursor.execute(sql)
             result = cursor.fetchall()
             outputQueryToConsole(sql, result)

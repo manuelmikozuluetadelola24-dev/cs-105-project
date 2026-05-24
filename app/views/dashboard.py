@@ -43,5 +43,11 @@ class DashboardView(ctk.CTk):
                 CustomersView(self.main_frame).pack(fill="both", expand=True)
             except Exception as e:
                 ctk.CTkLabel(self.main_frame, text=f"Error: {e}", font=ctk.CTkFont(size=14), text_color="red").pack(expand=True)
+        elif section == "Deliveries":
+            try:
+                from views.deliveries import DeliveriesView
+                DeliveriesView(self.main_frame).pack(fill="both", expand=True)
+            except Exception as e:
+                ctk.CTkLabel(self.main_frame, text=f"Error: {e}", font=ctk.CTkFont(size=14), text_color="red").pack(expand=True)
         else:
             ctk.CTkLabel(self.main_frame, text=f"{section} — coming soon", font=ctk.CTkFont(size=18)).pack(expand=True)
