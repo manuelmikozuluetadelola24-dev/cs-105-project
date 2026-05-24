@@ -23,7 +23,7 @@ class DeliveriesView(ctk.CTkFrame):
         # Table headers
         headers = ctk.CTkFrame(self)
         headers.pack(fill="x", padx=20)
-        for col, width in [("Delivery ID", 16), ("Order ID", 16), ("Delivery date", 120), ("Street", 120), ("Baranggay", 120), ("City", 120), ("Province", 120), ("Delivered by", 120), ("Status", 24)]:
+        for col, width in [("Delivery ID", 70), ("Order ID", 16), ("Delivery date", 120), ("Street", 120), ("Baranggay", 120), ("City", 120), ("Province", 120), ("Delivered by", 120), ("Status", 24)]:
             ctk.CTkLabel(headers, text=col, width=width, font=ctk.CTkFont(weight="bold"), anchor="w").pack(side="left", padx=5)
 
         # Scrollable list
@@ -52,7 +52,7 @@ class DeliveriesView(ctk.CTkFrame):
         for row in rows:
             row_frame = ctk.CTkFrame(self.list_frame, fg_color="transparent")
             row_frame.pack(fill="x", pady=2)
-            for value, width in zip(row, [16, 16, 120, 120, 120, 120, 120, 120, 24]):
+            for value, width in zip(row, [70, 70, 120, 120, 120, 120, 120, 120, 24]):
                 ctk.CTkLabel(row_frame, text=str(value), width=width, anchor="w").pack(side="left", padx=5)
 
     def open_add_form(self):
