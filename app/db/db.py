@@ -17,17 +17,18 @@ def outputQueryToConsole(sql, result):
         print(row)
 
 # MySQL Server Connection
+config = []
 
 def getConfig():
-    config = []
+    global config
     config_file = open("config", "r")
     for line in config_file:
         config.append(line.strip())
     
     config_file.close()
-    return config
 
-def initializeConnection(*config):
+def initializeConnection():
+    global config
     db_host, db_user, db_pass, db_name = config
     connection = pymysql.connect(host=db_host, user=db_user, password=db_pass, database=db_name, cursorclass=pymysql.cursors.Cursor)
     return connection
