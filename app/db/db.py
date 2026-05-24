@@ -83,7 +83,7 @@ def filterProductByCategory(connection, category):
 def listCustomers(connection, order="DESC", order_by="`customer_name`"):
     with connection:
         with connection.cursor() as cursor:
-            sql = "SELECT `customer_id`, `customer_name`, `customer_city`, `contact_number` FROM `CUSTOMER` ORDER BY " + order_by + " " + order
+            sql = "SELECT * FROM `CUSTOMER` ORDER BY " + order_by + " " + order
             cursor.execute(sql)
             result = cursor.fetchall()
             outputQueryToConsole(sql, result)
