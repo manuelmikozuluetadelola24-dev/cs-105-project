@@ -25,17 +25,19 @@ def getConfig():
     for line in config_file:
         config.append(line.strip())
     
+    config.append("")
+    config.append("")
     config_file.close()
 
 def initializeConnection():
     global config
-    db_host, db_user, db_pass, db_name = config
+    db_host, db_name, db_user, db_pass = config
     connection = pymysql.connect(host=db_host, user=db_user, password=db_pass, database=db_name, cursorclass=pymysql.cursors.Cursor)
     return connection
 
 def checkUser(db_user, db_pass):
     db_host = config[0]
-    db_name = config[3]
+    db_name = config[1]
     is_login_correct = False
     try:
         connection = pymysql.connect(host=db_host, user=db_user, password=db_pass, database=db_name)

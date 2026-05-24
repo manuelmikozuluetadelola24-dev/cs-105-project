@@ -33,11 +33,11 @@ class LoginView(ctk.CTk):
         password = self.password_entry.get()
 
         if(db.checkUser(user, password)):
-            db.config[1] = user
-            db.config[2] = password
+            db.config[2] = user
+            db.config[3] = password
             self.logged_in = True
             self.destroy()
         else:
             self.logged_in = False
-            print("Error, user does not exist")
+            self.error_label.configure(text="ERROR: Incorrect password or user does not exist\n please enter a valid user and password")
 
