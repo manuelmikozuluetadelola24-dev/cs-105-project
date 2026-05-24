@@ -1,7 +1,7 @@
-from db.connection import get_connection
+from db.db import initializeConnection
 
 try:
-    conn = get_connection()
+    conn = initializeConnection()
     print("Connected successfully!")
     conn.close()
 except Exception as e:

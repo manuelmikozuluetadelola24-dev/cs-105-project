@@ -1,6 +1,7 @@
 from views.login import LoginView
 from views.dashboard import DashboardView
-import db.db
+import db.db as db
+
 
 def testQueries():
 	connection = db.initializeConnection(*(db.getConfig()))

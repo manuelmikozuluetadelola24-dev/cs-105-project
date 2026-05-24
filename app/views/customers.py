@@ -1,5 +1,5 @@
 import customtkinter as ctk
-import db.db
+import db.db as db
 
 class CustomersView(ctk.CTkFrame):
     def __init__(self, parent):
@@ -28,7 +28,7 @@ class CustomersView(ctk.CTkFrame):
         for widget in self.list_frame.winfo_children():
             widget.destroy()
 
-        conn = get_connection()
+        conn = db.initializeConnection(*(db.getConfig()))
         cursor = conn.cursor()
         cursor.execute("SELECT customer_id, customer_name, contact_number, customer_city, customer_province FROM CUSTOMER")
         rows = cursor.fetchall()
@@ -57,7 +57,7 @@ class CustomersView(ctk.CTkFrame):
             entries[field] = entry
 
         def save():
-            conn = get_connection()
+            conn = db.initializeConnection(*(db.getConfig()))
             cursor = conn.cursor()
             cursor.execute("""
                 INSERT INTO CUSTOMER (customer_name, contact_number, customer_street, customer_barangay, customer_city, customer_province)
