@@ -33,6 +33,20 @@ def initializeConnection():
     connection = pymysql.connect(host=db_host, user=db_user, password=db_pass, database=db_name, cursorclass=pymysql.cursors.Cursor)
     return connection
 
+def checkUser(db_user, db_pass):
+    db_host = config[0]
+    db_name = config[3]
+    is_login_correct = False
+    try:
+        connection = pymysql.connect(host=db_host, user=db_user, password=db_pass, database=db_name)
+        is_login_correct
+        is_login_correct = True
+        connection.close()
+    except pymysql.err.OperationalError:
+        is_login_correct = False
+
+    return is_login_correct
+
 # Delivery Tracking
 
 def listDeliveries(connection, order="DESC", order_by="`DELIVERY`.`delivery_id`"):

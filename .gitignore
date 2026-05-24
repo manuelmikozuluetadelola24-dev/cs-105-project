@@ -3,3 +3,4 @@ app/Pipfile.lock
 app/config
 .vscode
 app/.venv
+app/config

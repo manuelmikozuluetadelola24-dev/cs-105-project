@@ -1,6 +1,8 @@
 from views.login import LoginView
 from views.dashboard import DashboardView
 import db.db as db
+db.getConfig()
+print(db.config)
 
 
 def testQueries():
@@ -22,9 +24,10 @@ def testQueries():
 def main():
     login = LoginView()
     login.mainloop()
+    print(db.config)
 
-    if login.logged_in_role:
-        dashboard = DashboardView(login.logged_in_role)
+    if(login.logged_in):
+        dashboard = DashboardView("Employee")
         dashboard.mainloop()
 
 main()
