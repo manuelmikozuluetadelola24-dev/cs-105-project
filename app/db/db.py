@@ -732,27 +732,3 @@ def get_customer_order_history(customer_id: int):
         WHERE o.customer_id = %s
         ORDER BY o.order_date DESC
     """, (customer_id,))
-
-def get_suppliers():
-    return _all("SELECT * FROM SUPPLIER ORDER BY supplier_id DESC")
-
-
-def add_supplier(supplier_name: str, contact_number: str, address: str | None = None):
-    return _execute("""
-        INSERT INTO SUPPLIER (
-            supplier_name,
-            contact_number,
-            supplier_street,
-            supplier_barangay,
-            supplier_city,
-            supplier_province
-        )
-        VALUES (%s, %s, %s, %s, %s, %s)
-    """, (
-        supplier_name,
-        contact_number,
-        address or "",
-        "",
-        "",
-        "",
-    ))
