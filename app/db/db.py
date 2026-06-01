@@ -368,15 +368,15 @@ def add_category(category_name: str, description: str | None = None) -> int:
     )
 
 
-def get_products():
-    return _all("""
+def get_products(order: str = "DESC", order_by: str = "`product_id`"):
+    sql = """
         SELECT p.product_id, p.product_name, pc.category_name, p.category_id,
                p.price, p.stock_quantity
         FROM PRODUCT p
         LEFT JOIN PRODUCT_CATEGORY pc ON p.category_id = pc.category_id
-        ORDER BY p.product_id DESC
-    """)
-
+    """ + " ORDER BY " + _order_clause(order_by, order)
+    
+    return _all(sql)
 
 def search_products(term: str):
     return _all("""

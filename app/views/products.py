@@ -19,9 +19,33 @@ class ProductsView(ctk.CTkFrame):
         ctk.CTkButton(top, text="Refresh", command=self.load_products).pack(side="left", padx=4)
         ctk.CTkButton(top, text="+ Add Product", command=self.add_product_form).pack(side="left", padx=4)
 
+        self._sort_by = "`product_id`"
+        self._sort_order = "DESC"
+
+        self.sort_order_button = ctk.CTkComboBox(top, values=["DESC", "ASC"], width=90, command=self.set_sort_order)
+        self.sort_order_button.set(self._sort_order)
+        self.sort_order_button.pack(side="right", padx=4)
+
+        self.sort_by_button = ctk.CTkComboBox(
+            top, 
+            values=["`product_id`", "`product_name`", "`price`", "`stock_quantity`", "`category_id`"], 
+            width=150, 
+            command=self.set_sort_by
+        )
+        self.sort_by_button.set(self._sort_by)
+        self.sort_by_button.pack(side="right", padx=4)
+
         self.table = ctk.CTkScrollableFrame(self, fg_color="white")
         self.table.pack(fill="both", expand=True)
 
+        self.load_products()
+
+    def set_sort_by(self, sort_by_button_choice):
+        self._sort_by = sort_by_button_choice
+        self.load_products()
+
+    def set_sort_order(self, sort_in_button_choice):
+        self._sort_order = sort_in_button_choice
         self.load_products()
 
     def clear_table(self):
@@ -57,7 +81,7 @@ class ProductsView(ctk.CTkFrame):
 
     def load_products(self):
         try:
-            self.build_table(db.get_products())
+            self.build_table(db.get_products(order=self._sort_order, order_by=self._sort_by))
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
