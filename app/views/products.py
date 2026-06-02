@@ -76,8 +76,13 @@ class ProductsView(ctk.CTkFrame):
                 row.get("stock_quantity"),
             ]
 
-            for v, w in zip(values, widths):
-                ctk.CTkLabel(line, text=str(v), width=w, anchor="w").pack(side="left", padx=5)
+            max_chars = [10, 28, 20, 10, 10]
+
+            for v, w, m in zip(values, widths, max_chars):
+                text = str(v)
+                if len(text) > m:
+                    text = f"{text[:m - 1]}…"
+                ctk.CTkLabel(line, text=text, width=w, anchor="w").pack(side="left", padx=5)
 
     def load_products(self):
         try:
