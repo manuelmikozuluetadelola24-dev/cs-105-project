@@ -536,13 +536,43 @@ def add_shipment_item(
     quantity: int,
     unit_cost: float | Decimal,
 ) -> int:
-    return _execute("""
-        INSERT INTO SHIPMENT_ITEM (shipment_id, product_id, quantity, unit_cost)
-        VALUES (%s, %s, %s, %s)
-    """, (shipment_id, product_id, quantity, unit_cost))
+    with connection(True) as conn, conn.cursor() as cur:
+        # Lock the shipment row so status can't change mid-transaction
+        cur.execute(
+            "SELECT status FROM SHIPMENT WHERE shipment_id=%s FOR UPDATE",
+            (shipment_id,),
+        )
+        shipment = cur.fetchone()
+
+        if not shipment:
+            raise ValueError(f"Shipment #{shipment_id} not found.")
+
+        cur.execute("""
+            INSERT INTO SHIPMENT_ITEM (shipment_id, product_id, quantity, unit_cost)
+            VALUES (%s, %s, %s, %s)
+        """, (shipment_id, product_id, quantity, unit_cost))
+
+        item_id = cur.lastrowid
+
+        # Apply stock immediately only if shipment is already DELIVERED
+        if shipment["status"] == "DELIVERED":
+            cur.execute("""
+                UPDATE PRODUCT
+                SET stock_quantity = stock_quantity + %s
+                WHERE product_id = %s
+            """, (quantity, product_id))
+
+        return item_id
+
+
+_VALID_SHIPMENT_STATUSES = {"PENDING", "SHIPPED", "DELIVERED", "CANCELLED"}
 
 
 def update_shipment_status(shipment_id: int, status: str) -> int:
+    status = status.upper()
+    if status not in _VALID_SHIPMENT_STATUSES:
+        raise ValueError(f"Invalid shipment status: {status!r}")
+
     with connection(True) as conn, conn.cursor() as cur:
         cur.execute("SELECT status FROM SHIPMENT WHERE shipment_id=%s FOR UPDATE", (shipment_id,))
         old = cur.fetchone()
@@ -550,14 +580,28 @@ def update_shipment_status(shipment_id: int, status: str) -> int:
         if not old:
             raise ValueError("Shipment not found.")
 
+        old_status = old["status"]
+
+        # Prevent rolling back a DELIVERED shipment — stock has already been applied
+        if old_status == "DELIVERED" and status != "DELIVERED":
+            raise ValueError(
+                "Cannot change status of a DELIVERED shipment. "
+                "Stock has already been updated."
+            )
+
         cur.execute("UPDATE SHIPMENT SET status=%s WHERE shipment_id=%s", (status, shipment_id))
 
-        if old["status"] != "DELIVERED" and status == "DELIVERED":
+        # Apply stock only on the PENDING/SHIPPED → DELIVERED transition
+        if old_status != "DELIVERED" and status == "DELIVERED":
             cur.execute("""
                 UPDATE PRODUCT p
-                JOIN SHIPMENT_ITEM si ON p.product_id = si.product_id
-                SET p.stock_quantity = p.stock_quantity + si.quantity
-                WHERE si.shipment_id = %s
+                JOIN (
+                    SELECT product_id, SUM(quantity) AS total_qty
+                    FROM SHIPMENT_ITEM
+                    WHERE shipment_id = %s
+                    GROUP BY product_id
+                ) si ON p.product_id = si.product_id
+                SET p.stock_quantity = p.stock_quantity + si.total_qty
             """, (shipment_id,))
 
         return cur.rowcount
@@ -574,6 +618,26 @@ def addShipmentItemToProductStockLevel(conn=None):
 
     return _run_write_compat(conn, sql)
 
+def get_items_for_shipment(shipment_id: int):
+    return _all("""
+        SELECT si.shipment_item_id, p.product_name,
+               si.quantity, si.unit_cost,
+               (si.quantity * si.unit_cost) AS total_cost
+        FROM SHIPMENT_ITEM si
+        JOIN PRODUCT p ON si.product_id = p.product_id
+        WHERE si.shipment_id = %s
+    """, (shipment_id,))
+
+def get_last_unit_cost(product_id: int) -> float:
+    row = _one("""
+        SELECT unit_cost 
+        FROM SHIPMENT_ITEM 
+        WHERE product_id = %s 
+        ORDER BY shipment_item_id DESC 
+        LIMIT 1
+    """, (product_id,))
+    
+    return float(row["unit_cost"]) if row else 0.00
 
 def get_deliveries():
     return listDeliveries(None)
