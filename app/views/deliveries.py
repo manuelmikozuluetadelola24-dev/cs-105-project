@@ -58,11 +58,11 @@ class DeliveriesView(ctk.CTkFrame):
     def open_add_form(self):
         form = ctk.CTkToplevel(self)
         form.title("Add Delivery")
-        form.geometry("400x450")
+        form.geometry("400x500")
         form.lift()                    
         form.attributes("-topmost", True)
 
-        fields = ["Delivery Date", "Street", "Barangay", "City", "Province", "Delivered By", "Status"]
+        fields = ["Order ID", "Delivery Date", "Street", "Barangay", "City", "Province", "Delivered By", "Status"]
         entries = {}
 
         for field in fields:
@@ -76,7 +76,7 @@ class DeliveriesView(ctk.CTkFrame):
             cursor = conn.cursor()
             cursor.execute("""
                 INSERT INTO DELIVERY (order_id, delivery_date, delivery_street, delivery_barangay, delivery_city, delivery_province, delivered_by, status)
-                VALUES (%s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 entries["Order ID"].get(),
                 entries["Delivery Date"].get(),

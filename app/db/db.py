@@ -750,11 +750,11 @@ def get_shipment_items_report():
 
 
 def get_delivery_status_report():
-    return (
-        filterDeliveriesBy(None, "'PENDING'")
-        + filterDeliveriesBy(None, "'SHIPPED'")
-        + filterDeliveriesBy(None, "'DELIVERED'")
-    )
+    result = []
+    result.extend(filterDeliveriesBy(None, "'PENDING'") or [])
+    result.extend(filterDeliveriesBy(None, "'SHIPPED'") or [])
+    result.extend(filterDeliveriesBy(None, "'DELIVERED'") or [])
+    return result
 
 
 def get_revenue_report(start_date: str | None = None, end_date: str | None = None):
