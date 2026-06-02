@@ -1,3 +1,5 @@
+from wsgiref import headers
+
 import customtkinter as ctk
 from tkinter import messagebox
 import db.db as db
@@ -43,17 +45,21 @@ class ReportsView(ctk.CTkFrame):
         header_frame = ctk.CTkFrame(self.table, fg_color="#e5e7eb")
         header_frame.pack(fill="x", pady=2)
 
-        for h, w in zip(headers, widths):
-            ctk.CTkLabel(header_frame, text=h, width=w, anchor="w", font=("Arial", 11, "bold")).pack(side="left", padx=5)
+        for col, (h, w) in enumerate(zip(headers, widths)):
+            lbl = ctk.CTkLabel(header_frame, text=h, width=w, anchor="w",
+                               font=("Arial", 11, "bold"), wraplength=w - 5)
+            lbl.grid(row=0, column=col, padx=5, sticky="w")
 
-        # Build rows
+    # Data rows
         for row in rows:
             row_frame = ctk.CTkFrame(self.table, fg_color="transparent")
             row_frame.pack(fill="x", pady=2)
 
-            for value, width in zip(row, widths):
+            for col, (value, width) in enumerate(zip(row, widths)):
                 text = str(value) if value is not None else ""
-                ctk.CTkLabel(row_frame, text=text, width=width, anchor="w", font=("Arial", 10)).pack(side="left", padx=5)
+                lbl = ctk.CTkLabel(row_frame, text=text, width=width, anchor="w",
+                               font=("Arial", 10))
+                lbl.grid(row=0, column=col, padx=5, sticky="w")
 
     def show_inventory_stock(self):
         try:
@@ -138,7 +144,7 @@ class ReportsView(ctk.CTkFrame):
                 ))
 
             headers = ["Order ID", "Customer", "Product", "Qty", "Unit Price", "Total"]
-            widths = [80, 150, 160, 70, 100, 100]
+            widths = [80, 150, 200, 70, 100, 100]
 
             self.build_table(rows, headers, widths)
         except Exception as e:
