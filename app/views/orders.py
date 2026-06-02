@@ -12,40 +12,49 @@ class OrdersView(ctk.CTkFrame):
         top = ctk.CTkFrame(self, fg_color="transparent")
         top.pack(fill="x", pady=(0, 10))
 
+        self.search_entry = ctk.CTkEntry(top, placeholder_text="Search customer/status/type", width=250)
+        self.search_entry.pack(side="left", padx=(0, 8))
+
+        ctk.CTkButton(top, text="Search", command=self.search).pack(side="left", padx=4)
         ctk.CTkButton(top, text="+ Create Order", command=self.add_order_form).pack(side="left", padx=4)
         ctk.CTkButton(top, text="Refresh", command=self.load_orders).pack(side="left", padx=4)
 
+        self._sort_by = "`order_date`"
         self._sort_order = "DESC"
 
         self.sort_order_button = ctk.CTkComboBox(top, values=["DESC", "ASC"], width=90, command=self.set_sort_order)
         self.sort_order_button.set(self._sort_order)
         self.sort_order_button.pack(side="right", padx=4)
 
+        self.sort_by_button = ctk.CTkComboBox(
+            top,
+            values=["`order_date`", "`order_id`", "`customer_name`", "`status`"],
+            width=160,
+            command=self.set_sort_by
+        )
+        self.sort_by_button.set(self._sort_by)
+        self.sort_by_button.pack(side="right", padx=4)
+
         self.table = ctk.CTkScrollableFrame(self, fg_color="white")
         self.table.pack(fill="both", expand=True)
 
+        self.load_orders()
+
+    def set_sort_by(self, choice):
+        self._sort_by = choice
         self.load_orders()
 
     def set_sort_order(self, choice):
         self._sort_order = choice
         self.load_orders()
 
-    def load_orders(self):
+    def build_table(self, rows):
         for widget in self.table.winfo_children():
             widget.destroy()
-
-        try:
-            rows = db.get_orders()
-        except Exception as e:
-            messagebox.showerror("Error", str(e))
-            return
 
         if not rows:
             ctk.CTkLabel(self.table, text="No orders found.").pack(pady=20)
             return
-
-        # Sort by order_date based on selected order
-        rows = sorted(rows, key=lambda r: str(r.get("order_date") or ""), reverse=(self._sort_order == "DESC"))
 
         headers = ["Order ID", "Customer Name", "Order Date", "Type", "Status", "Total Price", "", ""]
         widths   = [70,        180,              110,          90,     110,      100,           110, 120]
@@ -80,6 +89,31 @@ class OrdersView(ctk.CTkFrame):
                 line, text="Update Status", width=110,
                 command=lambda oid=order_id, cur=row.get("status"): self.open_status_window(oid, cur)
             ).pack(side="left", padx=4)
+
+    def load_orders(self):
+        try:
+            rows = db.listOrderWithCustomerInfo(order=self._sort_order, order_by=self._sort_by)
+            self.build_table(rows)
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+
+    def search(self):
+        term = self.search_entry.get().strip().lower()
+        if not term:
+            self.load_orders()
+            return
+
+        try:
+            rows = db.listOrderWithCustomerInfo(order=self._sort_order, order_by=self._sort_by)
+            filtered = [
+                r for r in rows
+                if term in str(r.get("customer_name", "")).lower()
+                or term in str(r.get("status", "")).lower()
+                or term in str(r.get("order_type", "")).lower()
+            ]
+            self.build_table(filtered)
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
 
     # Order Items sub-window
     def open_items_window(self, order_id):
@@ -133,7 +167,6 @@ class OrdersView(ctk.CTkFrame):
                 for v, w in zip(row_vals, widths):
                     ctk.CTkLabel(r, text=str(v), width=w, anchor="w").pack(side="left", padx=4)
 
-        # store refresh so add-item form can call it
         win._refresh_items = refresh_items
         refresh_items()
 
@@ -144,7 +177,6 @@ class OrdersView(ctk.CTkFrame):
         form.geometry("380x340")
         form.grab_set()
 
-        # Load products for the dropdown
         try:
             products = db.get_products()
         except Exception as e:
@@ -170,7 +202,6 @@ class OrdersView(ctk.CTkFrame):
         price_entry = ctk.CTkEntry(form, width=320)
         price_entry.pack()
 
-        # Auto-fill price when product selection changes
         def on_product_select(choice):
             p = product_map.get(choice)
             if p:
@@ -178,7 +209,6 @@ class OrdersView(ctk.CTkFrame):
                 price_entry.insert(0, str(p.get("price", "")))
 
         product_combo.configure(command=on_product_select)
-        # Fill price for initial selection
         on_product_select(product_combo.get())
 
         def save():
@@ -195,7 +225,7 @@ class OrdersView(ctk.CTkFrame):
                 db.add_order_item(order_id, product_id, quantity, price)
                 form.destroy()
                 parent_win._refresh_items()
-                self.load_orders()  # refresh total in main list
+                self.load_orders()
             except Exception as e:
                 messagebox.showerror("Save Error", str(e))
 
@@ -226,14 +256,13 @@ class OrdersView(ctk.CTkFrame):
 
         ctk.CTkButton(win, text="Save Status", command=save).pack(pady=16)
 
-    # Create Order form — search customer by name
+    # Create Order form
     def add_order_form(self):
         form = ctk.CTkToplevel(self)
         form.title("Create New Order")
         form.geometry("400x360")
         form.grab_set()
 
-        # Customer search
         ctk.CTkLabel(form, text="Search Customer Name").pack(pady=(14, 0))
         search_entry = ctk.CTkEntry(form, width=320, placeholder_text="Type to search…")
         search_entry.pack()
@@ -262,15 +291,13 @@ class OrdersView(ctk.CTkFrame):
                 customer_combo.set("")
 
         ctk.CTkButton(form, text="Search", command=search_customers).pack(pady=(6, 0))
-        search_customers()  # pre-load all customers
+        search_customers()
 
-        # Order date
         ctk.CTkLabel(form, text="Order Date (YYYY-MM-DD)").pack(pady=(12, 0))
         date_entry = ctk.CTkEntry(form, width=320)
         date_entry.pack()
         date_entry.insert(0, str(datetime.date.today()))
 
-        # Order type
         ctk.CTkLabel(form, text="Order Type").pack(pady=(10, 0))
         type_combo = ctk.CTkComboBox(form, values=["IN_STORE", "DELIVERY"], width=320)
         type_combo.set("IN_STORE")
