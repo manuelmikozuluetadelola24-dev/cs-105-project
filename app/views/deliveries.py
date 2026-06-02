@@ -75,15 +75,17 @@ class DeliveriesView(ctk.CTkFrame):
             conn = db.initializeConnection()
             cursor = conn.cursor()
             cursor.execute("""
-                INSERT INTO CUSTOMER (customer_name, contact_number, customer_street, customer_barangay, customer_city, customer_province)
+                INSERT INTO DELIVERY (order_id, delivery_date, delivery_street, delivery_barangay, delivery_city, delivery_province, delivered_by, status)
                 VALUES (%s, %s, %s, %s, %s, %s)
             """, (
-                entries["Name"].get(),
-                entries["Contact Number"].get(),
+                entries["Order ID"].get(),
+                entries["Delivery Date"].get(),
                 entries["Street"].get(),
                 entries["Barangay"].get(),
                 entries["City"].get(),
-                entries["Province"].get()
+                entries["Province"].get(),
+                entries["Delivered By"].get(),
+                entries["Status"].get()
             ))
             conn.commit()
             conn.close()
