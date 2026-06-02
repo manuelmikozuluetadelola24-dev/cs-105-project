@@ -30,7 +30,6 @@ class LoginFrame(ctk.CTkFrame):
             placeholder_text="Username",
         )
         self.username_entry.grid(row=1, column=0, padx=40, pady=8)
-        self.username_entry.insert(0, "owner")
 
         self.password_entry = ctk.CTkEntry(
             self,
