@@ -108,8 +108,9 @@ CREATE TABLE IF NOT EXISTS delola_store.`users` (
     UNIQUE (username)
 );
 
--- Owners
-INSERT IGNORE INTO delola_store.users (username, password) VALUES ('ace', 'ace123');
-INSERT IGNORE INTO delola_store.users (username, password) VALUES ('miko', 'miko123');
-INSERT IGNORE INTO delola_store.users (username, password) VALUES ('mel', 'mel123');
-INSERT IGNORE INTO delola_store.users (username, password) VALUES ('steph', 'steph123');
+-- Insert default users
+INSERT IGNORE INTO delola_store.users (username, password, role) VALUES ('ace', 'ace123', 'OWNER');
+INSERT IGNORE INTO delola_store.users (username, password, role) VALUES ('miko', 'miko123', 'OWNER');
+INSERT IGNORE INTO delola_store.users (username, password, role) VALUES ('mel', 'mel123', 'OWNER');
+INSERT IGNORE INTO delola_store.users (username, password, role) VALUES ('steph', 'steph123', 'OWNER');
+INSERT IGNORE INTO delola_store.users (username, password, role) VALUES ('emp', 'emp123', 'EMPLOYEE');
