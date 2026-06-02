@@ -156,7 +156,7 @@ class ReportsView(ctk.CTkFrame):
                     item.get("product_name"),
                     item.get("category_name"),
                     item.get("stock_quantity"),
-                    "🔴" if item.get("stock_quantity", 0) <= 5 else "🟡"
+                    "High" if item.get("stock_quantity", 0) <= 5 else "Low"
                 ))
 
             headers = ["Product ID", "Product Name", "Category", "Stock Qty", "Alert Level"]
