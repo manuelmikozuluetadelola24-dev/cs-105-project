@@ -1,6 +1,26 @@
 import customtkinter as ctk
 import db.db as db
 
+class Tooltip:
+    def __init__(self, widget, text):
+        self.widget = widget
+        self.text = text
+        self.tip = None
+        widget.bind("<Enter>", self.show)
+        widget.bind("<Leave>", self.hide)
+
+    def show(self, event):
+        x = self.widget.winfo_rootx() + 20
+        y = self.widget.winfo_rooty() + 20
+        self.tip = ctk.CTkToplevel(self.widget)
+        self.tip.wm_overrideredirect(True)
+        self.tip.wm_geometry(f"+{x}+{y}")
+        ctk.CTkLabel(self.tip, text=self.text, fg_color="#333333", text_color="white", corner_radius=6).pack(padx=6, pady=4)
+
+    def hide(self, event):
+        if self.tip:
+            self.tip.destroy()
+            self.tip = None
 class CustomersView(ctk.CTkFrame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -52,8 +72,16 @@ class CustomersView(ctk.CTkFrame):
         for row in rows:
             row_frame = ctk.CTkFrame(self.list_frame, fg_color="transparent")
             row_frame.pack(fill="x", pady=2)
-            for value, width in zip(row, [16, 200, 120, 120, 120, 120, 120]):
-                ctk.CTkLabel(row_frame, text=str(value), width=width, anchor="w").pack(side="left", padx=5)
+            
+            max_chars = [6, 22, 13, 16, 16, 14, 14]
+
+            for value, width, m in zip(row, [16, 200, 120, 120, 120, 120, 120], max_chars):
+                text = str(value)
+                truncated = f"{text[:m - 1]}…" if len(text) > m else text
+                label = ctk.CTkLabel(row_frame, text=truncated, width=width, anchor="w")
+                label.pack(side="left", padx=5)
+                if len(text) > m:
+                    Tooltip(label, text)
 
     def open_add_form(self):
         form = ctk.CTkToplevel(self)

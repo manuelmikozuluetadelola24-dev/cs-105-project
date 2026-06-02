@@ -32,7 +32,7 @@ class App(ctk.CTk):
             anchor="w", padx=20, pady=(30, 10)
         )
 
-        role = user.get("role") if user else "OWNER"
+        role = (user.get("role") or "EMPLOYEE") if user else "OWNER"
         ctk.CTkLabel(sidebar, text=f"Role: {role}", text_color="#cbd5e1").pack(anchor="w", padx=20, pady=(0, 20))
 
         self.content = ctk.CTkFrame(self, fg_color="#f4f6f9")
