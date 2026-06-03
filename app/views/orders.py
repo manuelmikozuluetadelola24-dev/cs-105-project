@@ -235,20 +235,32 @@ class OrdersView(ctk.CTkFrame):
     def open_status_window(self, order_id, current_status):
         win = ctk.CTkToplevel(self)
         win.title(f"Update Order #{order_id} Status")
-        win.geometry("300x200")
+        win.geometry("320x260")
         win.grab_set()
 
         ctk.CTkLabel(win, text=f"Order #{order_id}", font=("Arial", 14, "bold")).pack(pady=(16, 4))
         ctk.CTkLabel(win, text=f"Current status: {current_status}").pack(pady=(0, 12))
 
-        status_combo = ctk.CTkComboBox(win, values=["PENDING", "SHIPPED", "DELIVERED", "CANCELLED"], width=220)
+        is_locked = (current_status or "").upper() in ["DELIVERED", "CANCELLED"]
+
+        if is_locked:
+            ctk.CTkLabel(
+                win,
+                text="This order is locked.\nNo further changes allowed.",
+                text_color="gray",
+                justify="center",
+            ).pack(pady=(0, 12))
+            ctk.CTkButton(win, text="Close", command=win.destroy).pack(pady=8)
+            return
+
+        status_combo = ctk.CTkComboBox(win, values=["PENDING", "SHIPPED", "DELIVERED", "CANCELLED"], width=240)
         status_combo.set(current_status or "PENDING")
-        status_combo.pack()
+        status_combo.pack(pady=10)
 
         def save():
             new_status = status_combo.get()
             try:
-                db.updateOrderStatus(new_status=new_status, with_id=order_id)
+                db.update_order_status(order_id, new_status)
                 win.destroy()
                 self.load_orders()
             except Exception as e:

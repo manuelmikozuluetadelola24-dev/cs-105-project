@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS ORDERS (
     status ENUM('PENDING', 'SHIPPED', 'DELIVERED', 'CANCELLED') DEFAULT 'PENDING',
     total_price DECIMAL(10, 2) NOT NULL,
     order_type ENUM('IN_STORE', 'DELIVERY') NOT NULL,
+    is_locked BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (customer_id) REFERENCES CUSTOMER(customer_id),
     UNIQUE (customer_id, order_date, order_type)
 );
@@ -115,3 +116,7 @@ INSERT IGNORE INTO delola_store.users (username, password, role) VALUES ('miko',
 INSERT IGNORE INTO delola_store.users (username, password, role) VALUES ('mel', 'mel123', 'OWNER');
 INSERT IGNORE INTO delola_store.users (username, password, role) VALUES ('steph', 'steph123', 'OWNER');
 INSERT IGNORE INTO delola_store.users (username, password, role) VALUES ('emp', 'emp123', 'EMPLOYEE');
+
+-- Migration: Add order locking support
+-- Adds is_locked column to ORDERS table to track locked orders (cancelled or delivered)
+ALTER TABLE ORDERS ADD COLUMN IF NOT EXISTS is_locked BOOLEAN DEFAULT FALSE;

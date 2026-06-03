@@ -347,10 +347,74 @@ def deductFromStock(conn=None, deduct_amount: str = "- 0", with_id: str | int = 
     return _run_write_compat(conn, sql, (amount, int(with_id)))
 
 
-def updateOrderStatus(conn=None, new_status: str = "'PENDING'", with_id: str | int = 0):
-    sql = "UPDATE ORDERS SET status = %s WHERE order_id = %s"
+def update_order_status(order_id: int, status: str) -> int:
+    """
+    Update order status with business logic:
+    - When CANCELLED: lock order and return stock to inventory
+    - When DELIVERED: lock order
+    - Prevent status changes on locked orders
+    """
+    status = status.upper()
+    if status not in _VALID_ORDER_STATUSES:
+        raise ValueError(f"Invalid order status: {status!r}")
 
-    return _run_write_compat(conn, sql, (new_status.strip("'"), int(with_id)))
+    with connection(True) as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT status, is_locked FROM ORDERS WHERE order_id=%s FOR UPDATE",
+            (order_id,)
+        )
+        order = cur.fetchone()
+
+        if not order:
+            raise ValueError("Order not found.")
+
+        old_status = order["status"]
+        is_locked = order.get("is_locked", False)
+
+        # Prevent status changes on locked orders
+        if is_locked:
+            raise ValueError(
+                "Cannot change status of a locked order. "
+                "Order is finalized."
+            )
+
+        lock_order = False
+        
+        # When transitioning to CANCELLED: return stock and lock
+        if old_status != "CANCELLED" and status == "CANCELLED":
+            lock_order = True
+            # Return all items to product stock
+            cur.execute("""
+                UPDATE PRODUCT p
+                JOIN (
+                    SELECT product_id, SUM(quantity) AS total_qty
+                    FROM ORDER_ITEM
+                    WHERE order_id = %s
+                    GROUP BY product_id
+                ) oi ON p.product_id = oi.product_id
+                SET p.stock_quantity = p.stock_quantity + oi.total_qty
+            """, (order_id,))
+
+        # When transitioning to DELIVERED: lock
+        elif old_status != "DELIVERED" and status == "DELIVERED":
+            lock_order = True
+
+        # Update order status and lock status if needed
+        cur.execute(
+            "UPDATE ORDERS SET status=%s, is_locked=%s WHERE order_id=%s",
+            (status, lock_order, order_id)
+        )
+
+        return cur.rowcount
+
+
+def updateOrderStatus(conn=None, new_status: str = "'PENDING'", with_id: str | int = 0):
+    """
+    Legacy wrapper for update_order_status.
+    Delegates to the new function with enhanced business logic.
+    """
+    return update_order_status(int(with_id), new_status.strip("'"))
+
 
 
 # ---------------------------------------------------------------------------
@@ -566,6 +630,7 @@ def add_shipment_item(
 
 
 _VALID_SHIPMENT_STATUSES = {"PENDING", "SHIPPED", "DELIVERED", "CANCELLED"}
+_VALID_ORDER_STATUSES = {"PENDING", "SHIPPED", "DELIVERED", "CANCELLED"}
 
 
 def update_shipment_status(shipment_id: int, status: str) -> int:
@@ -603,6 +668,75 @@ def update_shipment_status(shipment_id: int, status: str) -> int:
                 ) si ON p.product_id = si.product_id
                 SET p.stock_quantity = p.stock_quantity + si.total_qty
             """, (shipment_id,))
+
+        return cur.rowcount
+
+
+def update_order_status(order_id: int, status: str) -> int:
+    """
+    Update order status with business logic:
+    - When CANCELLED: lock order and return stock to inventory
+    - When DELIVERED: lock order
+    - Prevent status changes on locked orders
+    """
+    status = status.upper()
+    if status not in _VALID_ORDER_STATUSES:
+        raise ValueError(f"Invalid order status: {status!r}")
+
+    with connection(True) as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT status, is_locked FROM ORDERS WHERE order_id=%s FOR UPDATE",
+            (order_id,)
+        )
+        order = cur.fetchone()
+
+        if not order:
+            raise ValueError("Order not found.")
+
+        old_status = order["status"]
+        is_locked = order["is_locked"]
+
+        # Prevent status changes on locked orders
+        if is_locked and old_status != status:
+            raise ValueError(
+                "Cannot change status of a locked order. "
+                "Order is finalized."
+            )
+
+        # Prevent rolling back a DELIVERED order
+        if old_status == "DELIVERED" and status != "DELIVERED":
+            raise ValueError(
+                "Cannot change status of a DELIVERED order. "
+                "Order is finalized."
+            )
+
+        # Prepare status update and locking
+        lock_order = False
+        
+        # When transitioning to CANCELLED: return stock and lock
+        if old_status != "CANCELLED" and status == "CANCELLED":
+            lock_order = True
+            # Return all items to product stock
+            cur.execute("""
+                UPDATE PRODUCT p
+                JOIN (
+                    SELECT product_id, SUM(quantity) AS total_qty
+                    FROM ORDER_ITEM
+                    WHERE order_id = %s
+                    GROUP BY product_id
+                ) oi ON p.product_id = oi.product_id
+                SET p.stock_quantity = p.stock_quantity + oi.total_qty
+            """, (order_id,))
+
+        # When transitioning to DELIVERED: lock
+        elif old_status != "DELIVERED" and status == "DELIVERED":
+            lock_order = True
+
+        # Update order status and lock status if needed
+        cur.execute(
+            "UPDATE ORDERS SET status=%s, is_locked=%s WHERE order_id=%s",
+            (status, lock_order, order_id)
+        )
 
         return cur.rowcount
 
