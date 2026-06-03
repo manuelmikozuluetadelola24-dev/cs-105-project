@@ -16,10 +16,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-# ---------------------------------------------------------------------------
 # Configuration
-# ---------------------------------------------------------------------------
-
 @dataclass
 class DatabaseConfig:
     host: str = "localhost"
@@ -29,10 +26,8 @@ class DatabaseConfig:
     port: int = 3306
 
 
-# ---------------------------------------------------------------------------
-# Core Database class
-# ---------------------------------------------------------------------------
 
+# Core Database class
 class Database:
     """All database operations for the Delola Store system."""
 
@@ -42,10 +37,7 @@ class Database:
         self.cursor = None
         self.connect()
 
-    # ------------------------------------------------------------------
     # Connection management
-    # ------------------------------------------------------------------
-
     def connect(self) -> bool:
         try:
             self.connection = mysql.connector.connect(
@@ -91,10 +83,8 @@ class Database:
             logger.error("Query failed: %s\nSQL: %s\nParams: %s", e, sql, params)
             raise
 
-    # ==================================================================
+   
     # PRODUCT CATEGORY
-    # ==================================================================
-
     def get_all_categories(self) -> list[dict]:
         return self._execute("SELECT * FROM PRODUCT_CATEGORY ORDER BY category_name", fetch="all")
 
@@ -119,10 +109,8 @@ class Database:
             "DELETE FROM PRODUCT_CATEGORY WHERE category_id = %s", (category_id,)
         )
 
-    # ==================================================================
+    
     # PRODUCT
-    # ==================================================================
-
     def get_all_products(self) -> list[dict]:
         sql = """
             SELECT p.*, c.category_name
@@ -177,10 +165,8 @@ class Database:
         """
         return self._execute(sql, (f"%{keyword}%",), fetch="all")
 
-    # ==================================================================
+ 
     # SUPPLIER
-    # ==================================================================
-
     def get_all_suppliers(self) -> list[dict]:
         return self._execute("SELECT * FROM SUPPLIER ORDER BY supplier_name", fetch="all")
 
@@ -215,10 +201,8 @@ class Database:
     def delete_supplier(self, supplier_id: int) -> int:
         return self._execute("DELETE FROM SUPPLIER WHERE supplier_id = %s", (supplier_id,))
 
-    # ==================================================================
+   
     # SHIPMENT
-    # ==================================================================
-
     def get_all_shipments(self) -> list[dict]:
         sql = """
             SELECT s.*, sup.supplier_name
@@ -265,10 +249,8 @@ class Database:
     def delete_shipment(self, shipment_id: int) -> int:
         return self._execute("DELETE FROM SHIPMENT WHERE shipment_id = %s", (shipment_id,))
 
-    # ==================================================================
+    
     # SHIPMENT ITEM
-    # ==================================================================
-
     def get_shipment_items(self, shipment_id: int) -> list[dict]:
         sql = """
             SELECT si.*, p.product_name
@@ -296,10 +278,8 @@ class Database:
             "DELETE FROM SHIPMENT_ITEM WHERE shipment_item_id = %s", (shipment_item_id,)
         )
 
-    # ==================================================================
+   
     # CUSTOMER
-    # ==================================================================
-
     def get_all_customers(self) -> list[dict]:
         return self._execute("SELECT * FROM CUSTOMER ORDER BY customer_name", fetch="all")
 
@@ -340,10 +320,8 @@ class Database:
             (f"%{keyword}%",), fetch="all",
         )
 
-    # ==================================================================
+    
     # ORDERS
-    # ==================================================================
-
     def get_all_orders(self) -> list[dict]:
         sql = """
             SELECT o.*, c.customer_name
@@ -397,10 +375,8 @@ class Database:
             "UPDATE ORDERS SET total_price=%s WHERE order_id=%s", (total, order_id)
         )
 
-    # ==================================================================
+    
     # ORDER ITEM
-    # ==================================================================
-
     def get_order_items(self, order_id: int) -> list[dict]:
         sql = """
             SELECT oi.*, p.product_name
@@ -450,10 +426,8 @@ class Database:
             self._recalculate_order_total(old["order_id"])
         return result
 
-    # ==================================================================
+    
     # IN-STORE ORDER
-    # ==================================================================
-
     def add_in_store_order_details(self, order_id: int,
                                    release_time: Optional[str] = None,
                                    claimed_by: Optional[str] = None) -> int:
@@ -479,10 +453,8 @@ class Database:
             "DELETE FROM IN_STORE_ORDER WHERE order_id=%s", (order_id,)
         )
 
-    # ==================================================================
+   
     # DELIVERY ORDER
-    # ==================================================================
-
     def add_delivery_order_details(self, order_id: int,
                                    order_note: Optional[str] = None) -> int:
         return self._execute(
@@ -504,10 +476,8 @@ class Database:
     def delete_delivery_order(self, order_id: int) -> int:
         return self._execute("DELETE FROM DELIVERY_ORDER WHERE order_id=%s", (order_id,))
 
-    # ==================================================================
+    
     # DELIVERY
-    # ==================================================================
-
     def get_all_deliveries(self) -> list[dict]:
         sql = """
             SELECT d.*, o.order_date, c.customer_name
@@ -562,10 +532,8 @@ class Database:
     def delete_delivery(self, delivery_id: int) -> int:
         return self._execute("DELETE FROM DELIVERY WHERE delivery_id=%s", (delivery_id,))
 
-    # ==================================================================
+    
     # REPORTS
-    # ==================================================================
-
     def get_inventory_stock_report(self) -> list[dict]:
         """Full inventory with category and stock."""
         sql = """
@@ -727,10 +695,8 @@ class Database:
         """
         return self._execute(sql, (customer_id,), fetch="all")
 
-    # ==================================================================
+   
     # UTILITY
-    # ==================================================================
-
     def sort_table(self, table: str, column: str, ascending: bool = True) -> list[dict]:
         """
         Generic sort for any table. Only allow known tables/columns to avoid SQL injection.
@@ -762,10 +728,8 @@ class Database:
         return self._execute(sql, (value,), fetch="all")
 
 
-# ---------------------------------------------------------------------------
-# Context Manager
-# ---------------------------------------------------------------------------
 
+# Context Manager
 class DatabaseContextManager:
     def __init__(self, config: DatabaseConfig):
         self.config = config
@@ -781,10 +745,8 @@ class DatabaseContextManager:
         return False  # do not suppress exceptions
 
 
-# ---------------------------------------------------------------------------
-# Default config (edit to match your environment)
-# ---------------------------------------------------------------------------
 
+# Default config (edit to match your environment)
 DEFAULT_CONFIG = DatabaseConfig(
     host="localhost",
     user="root",

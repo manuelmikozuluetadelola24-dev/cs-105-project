@@ -71,10 +71,7 @@ class ReportsView(ctk.CTkFrame):
 
         self._switch_report("Inventory Stock", self._load_inventory_stock)
 
-    # -------------------------------------------------------------------------
     # Internals
-    # -------------------------------------------------------------------------
-
     def _switch_report(self, label: str, loader):
         self._current_report = label
         self._current_loader = loader
@@ -148,10 +145,7 @@ class ReportsView(ctk.CTkFrame):
                 ctk.CTkLabel(row_frame, text=text, width=width, anchor="w",
                              font=("Arial", 10)).grid(row=0, column=col, padx=5, sticky="w")
 
-    # -------------------------------------------------------------------------
     # Report loaders
-    # -------------------------------------------------------------------------
-
     def _load_inventory_stock(self):
         try:
             rows = db.get_inventory_stock_report()
